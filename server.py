@@ -9,9 +9,12 @@ pd = 1
 LRU_instance = LRUCache(4)
 CPU = CPU(1,0.2)
 
-def create(val):
-	P = Process(1,"1",val)
+def create(pid, val):
+	P = Process(pid,"1",val/pageSize)
 	LRU_instance.insertItem(P)
+
+def address(pid, desplazamiento):
+	
 
 
 #from tabulate import tabulate
@@ -20,8 +23,10 @@ quantum = 1.0
 realMemory = 3
 swapMemory = 4
 pageSize = 1
+pageSizeB = pageSize * 1024
 #timestamp = 0.0
 delta = quantum
+pid = 0
 
 def initConnection():
 	# Create a TCP/IP socket
@@ -95,13 +100,13 @@ try:
 
 		#Create %s, size in pages
 		if command == "Create":
-			create(parameters[1])
+			create(pid+1, parameters[1])
 		#Quantum
 		if command == "Quantum":
 			print("Quantum")
 		#Address
 		if command == "Address":
-			address(command, parameters[1], parameters[2])
+			address(parameters[1], parameters[2])
 		#Fin
 		#End
 
