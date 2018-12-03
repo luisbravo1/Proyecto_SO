@@ -31,7 +31,10 @@ class LRUCache(object):
 		return self.item_list[0]
 
 	def findItem(self,key):
-		return self.hash[key]
+		if (key in self.hash):
+			return self.hash[key]
+		else:
+			return None
 
 	def removeItem(self,item):
 

@@ -9,11 +9,13 @@ from tabulate import tabulate
 
 pid = 1
 
-LRU_instance = LRUCache(1)
+LRU_instance = LRUCache(4)
 CPU = CPU(1,1)
 
 timestamp = 0
 Cola_de_Listos = ""
+tmp = 0
+
 
 def incrementTimestamp(time):
 	global timestamp
@@ -22,12 +24,14 @@ def incrementTimestamp(time):
 
 def create(val):
 	global pid
+	global tmp
 	P = Process(pid,str(pid),val)
 	if (CPU.get_process() == None):
 		CPU.add(P)
+		tmp = P.key
 	else:
 		LRU_instance.insertItem(P)
-	print("<" + str(timestamp) + "> process " + str(pid) + " created size:" + str(val))
+	#print("<" + str(timestamp) + "> process " + str(pid) + " created size:" + str(val))
 	pid = pid + 1
 	print_cache(LRU_instance)
 
@@ -42,6 +46,7 @@ def print_cache(cache):
 #from tabulate import tabulate
 
 quantum = 1.0
+quantum_add = 1
 realMemory = 3
 swapMemory = 4
 pageSize = 1
@@ -84,9 +89,9 @@ try:
 
 
 		data = connection.recv(256)
-		print >>sys.stderr, 'server received "%s"' % data
+		#print >>sys.stderr, 'server received "%s"' % data
 		if data:
-			print >>sys.stderr, 'sending answer back to the client'
+			#print >>sys.stderr, 'sending answer back to the client'
 
 			connection.sendall('process created')
 		else:
@@ -110,12 +115,7 @@ try:
 		if " " in  command:
 			parameters = commentSplit[0].split(" ")
 			command = parameters[0]
-		print_cache(LRU_instance)
-		if (not CPU.get_process() == None):
-			tmp = CPU.get_process().key
-		else:
-			tmp = ""
-		print tabulate([['Comando','timestamp','Cola de listos','CPU'],[command,timestamp,Cola_de_Listos,tmp]], headers='firstrow',tablefmt='orgtbl')
+		print(" ")
 
 		#Create %s, size in pages
 		if command == "Create":
@@ -130,15 +130,30 @@ try:
 			CPU.add(P)
 			if (not P1 == None):
 				LRU_instance.insertItem(P1)
+				timestamp = quantum * quantum_add
+				quantum_add = quantum_add + 1
+		if command == "QuantumV":
+			quantum = int(parameters[1])
 		if command == "Fin":
 			P = LRU_instance.findItem(int(parameters[1]))
-			LRU_instance.removeItem(P)
+			if (not P == None):
+				LRU_instance.removeItem(P)
+			elif (CPU.get_process().key == int(parameters[1])):
+				P1 = CPU.quantum_end()
+				P = LRU_instance.getItem()
+				LRU_instance.removeItem(P)
+				CPU.add(P)
 			#connection.sendall("<" + str(timestamp) + "> Proceso " + str(parameters[1]) + " terminado")
 		#Address
 		if command == "Address":
 			address(command, parameters[1], parameters[2])
 		#Fin
 		#End
+
+		if (not CPU.get_process() == None):
+			tmp = CPU.get_process().key
+		print_cache(LRU_instance)
+		print tabulate([['Comando','timestamp','Cola de listos','CPU'],[(command + " " + parameters[1]),timestamp,Cola_de_Listos,tmp]], headers='firstrow',tablefmt='orgtbl')
 
 
 
