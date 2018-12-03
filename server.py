@@ -14,7 +14,7 @@ def create(pid, val):
 	LRU_instance.insertItem(P)
 
 def address(pid, desplazamiento):
-	
+
 
 
 #from tabulate import tabulate
@@ -22,8 +22,8 @@ def address(pid, desplazamiento):
 quantum = 1.0
 realMemory = 3
 swapMemory = 4
-pageSize = 1
-pageSizeB = pageSize * 1024
+pageSize = 1.0
+pageSizeB = pageSize * 1024.0
 #timestamp = 0.0
 delta = quantum
 pid = 0
