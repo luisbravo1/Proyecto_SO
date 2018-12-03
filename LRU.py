@@ -31,7 +31,10 @@ class LRUCache(object):
 	def getItem(self):
 		return self.item_list[0]
 
-	def removeItem(self, item):
+	def findItem(self,key):
+		return self.hash[key]
+
+	def removeItem(self,item):
 
 		del self.hash[item.key]
 		del self.item_list[self.item_list.index(item)]
@@ -49,14 +52,3 @@ class LRUCache(object):
 
 	def isEmpty(self):
 		return (len(self.item_list) == 0)
-
-
-def print_cache(cache):
-	for i, item in enumerate(cache.item_list):
-		print ("index: {0} "
-			   "key: {1} "
-			   "item: {2} "
-			   "timestamp: {3}".format(i,
-									   item.key,
-									   item.item,
-									   item.timestamp))

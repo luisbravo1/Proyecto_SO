@@ -1,18 +1,38 @@
 import socket
 import sys
 import time
+from datetime import datetime
 from Process import *
 from CPU_class import *
 from LRU import *
 
-pd = 1
-LRU_instance = LRUCache(4)
-CPU = CPU(1,0.2)
+pid = 1
+
+LRU_instance = LRUCache(6)
+CPU = CPU(1,1)
+
+timestamp = 0
+Processes = []
+
+def incrementTimestamp(time):
+	global timestamp
+	timestamp += time
+
 
 def create(val):
-	P = Process(1,"1",val)
+	global pid
+	P = Process(pid,str(pid),val)
 	LRU_instance.insertItem(P)
+	print("<" + str(timestamp) + "> process " + str(pid) + " created size:" + str(val))
+	pid = pid + 1
+	print_cache(LRU_instance)
 
+
+def print_cache(cache):
+	output = ""
+	for i, item in enumerate(cache.item_list):
+		output = output + str(item.key) + " "
+	print(output)
 
 #from tabulate import tabulate
 
@@ -49,9 +69,6 @@ def initConnection():
 	#Data is read from the connection with recv() and transmitted with sendall().
 	return sock.accept()
 
-def incrementTimestamp(time):
-	global timestamp
-	timestamp += time
 
 
 try:
@@ -60,6 +77,8 @@ try:
 
     # Receive the data
 	while True:
+
+
 		data = connection.recv(256)
 		print >>sys.stderr, 'server received "%s"' % data
 		if data:
@@ -71,17 +90,19 @@ try:
 			connection.close()
 			sys.exit()
 
-
-		if (CPU.finished and not LRU_instance.isEmpty()):
+		incrementTimestamp(0.001)
+		print_cache(LRU_instance)
+		if (CPU.finished() and not LRU_instance.isEmpty()):
 			P = LRU_instance.getItem()
 			LRU_instance.removeItem(P)
 			CPU.add(P)
-		else:
-			CPU.run()
+		#else:
+			#CPU.run()
 
 		command = data
 		comment = None
 		parameters = []
+		commentSplit = []
 
 		if "//" in command:
 			commentSplit = data.split("//")
@@ -91,20 +112,23 @@ try:
 			parameters = commentSplit[0].split(" ")
 			command = parameters[0]
 
-		incrementTimestamp(0.001)
-
 		#Create %s, size in pages
 		if command == "Create":
+			#connection.sendall("<" + str(timestamp) + "> process " + str(pid) + " created size:" + str(parameters[1]))
 			create(parameters[1])
 		#Quantum
 		if command == "Quantum":
-			print("Quantum")
+			#connection.sendall("<" + str(timestamp) + "> quantum end")
+			CPU.quantum_end()
+		if command == "Fin":
+			P = LRU_instance.findItem(int(parameters[1]))
+			LRU_instance.removeItem(P)
+			#connection.sendall("<" + str(timestamp) + "> Proceso " + str(parameters[1]) + " terminado")
 		#Address
 		if command == "Address":
 			address(command, parameters[1], parameters[2])
 		#Fin
 		#End
-
 
 
 
