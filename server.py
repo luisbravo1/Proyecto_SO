@@ -5,14 +5,15 @@ from datetime import datetime
 from Process import *
 from CPU_class import *
 from LRU import *
+from tabulate import tabulate
 
 pid = 1
 
-LRU_instance = LRUCache(6)
+LRU_instance = LRUCache(1)
 CPU = CPU(1,1)
 
 timestamp = 0
-Processes = []
+Cola_de_Listos = ""
 
 def incrementTimestamp(time):
 	global timestamp
@@ -22,17 +23,21 @@ def incrementTimestamp(time):
 def create(val):
 	global pid
 	P = Process(pid,str(pid),val)
-	LRU_instance.insertItem(P)
+	if (CPU.get_process() == None):
+		CPU.add(P)
+	else:
+		LRU_instance.insertItem(P)
 	print("<" + str(timestamp) + "> process " + str(pid) + " created size:" + str(val))
 	pid = pid + 1
 	print_cache(LRU_instance)
 
 
 def print_cache(cache):
+	global Cola_de_Listos
 	output = ""
 	for i, item in enumerate(cache.item_list):
 		output = output + str(item.key) + " "
-	print(output)
+	Cola_de_Listos = output
 
 #from tabulate import tabulate
 
@@ -70,7 +75,6 @@ def initConnection():
 	return sock.accept()
 
 
-
 try:
 	connection, client_address = initConnection()
 	print >>sys.stderr, 'connection from', client_address
@@ -91,11 +95,6 @@ try:
 			sys.exit()
 
 		incrementTimestamp(0.001)
-		print_cache(LRU_instance)
-		if (CPU.finished() and not LRU_instance.isEmpty()):
-			P = LRU_instance.getItem()
-			LRU_instance.removeItem(P)
-			CPU.add(P)
 		#else:
 			#CPU.run()
 
@@ -111,6 +110,12 @@ try:
 		if " " in  command:
 			parameters = commentSplit[0].split(" ")
 			command = parameters[0]
+		print_cache(LRU_instance)
+		if (not CPU.get_process() == None):
+			tmp = CPU.get_process().key
+		else:
+			tmp = ""
+		print tabulate([['Comando','timestamp','Cola de listos','CPU'],[command,timestamp,Cola_de_Listos,tmp]], headers='firstrow',tablefmt='orgtbl')
 
 		#Create %s, size in pages
 		if command == "Create":
@@ -119,7 +124,12 @@ try:
 		#Quantum
 		if command == "Quantum":
 			#connection.sendall("<" + str(timestamp) + "> quantum end")
-			CPU.quantum_end()
+			P1 = CPU.quantum_end()
+			P = LRU_instance.getItem()
+			LRU_instance.removeItem(P)
+			CPU.add(P)
+			if (not P1 == None):
+				LRU_instance.insertItem(P1)
 		if command == "Fin":
 			P = LRU_instance.findItem(int(parameters[1]))
 			LRU_instance.removeItem(P)

@@ -20,9 +20,13 @@ class CPU(object):
 				self.finish = True
 
 	def quantum_end(self):
+		process_b = self.process
 		self.process = None
 		self.finish = True
+		return process_b
 
+	def get_process(self):
+		return self.process
 
 	def finished(self):
 		return (self.finish)

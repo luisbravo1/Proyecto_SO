@@ -11,7 +11,7 @@ sock.connect(server_address)
 
 # After the connection is established, data can be sent through the socket with sendall() and received with recv(), just as in the server.
 
-messages = ['Create 2 //', 'Create 1 // ', 'Fin 1 //']
+messages = ['Create 2048 //', 'Create 3072 // ', 'Create 5000 //','Quantum //','Quantum //','Create 1024 //','Quantum']
 try:
 
       # Send data
