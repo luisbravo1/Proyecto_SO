@@ -11,25 +11,25 @@ sock.connect(server_address)
 
 # After the connection is established, data can be sent through the socket with sendall() and received with recv(), just as in the server.
 
-messages = ['create // process A', 'create //process B']
+messages = ['create 2', 'create 1']
 try:
-    
+
     # Send data
     for m in messages:
 		print >>sys.stderr, 'client sending "%s"' % m
 		sock.sendall(m)
 
 		# Look for the response
-    
+
 		respuesta = sock.recv(256)
-        
+
 		print >>sys.stderr, 'client received "%s"' % respuesta
 
 finally:
     print >>sys.stderr, 'closing socket'
     sock.close()
 
-  
+
 
 
 def main(args):

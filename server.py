@@ -1,6 +1,18 @@
 import socket
 import sys
 import time
+from Process import *
+from CPU_class import *
+from LRU import *
+
+pd = 1
+LRU_instance = LRUCache(4)
+CPU = CPU(1,0.2)
+
+def create(val):
+	P = Process(1,"1",val)
+	LRU_instance.insertItem(P)
+
 
 # Create a TCP/IP socket
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -27,19 +39,42 @@ connection, client_address = sock.accept()
 try:
 	print >>sys.stderr, 'connection from', client_address
 
-    # Receive the data 
-	while True:   
+    # Receive the data
+	while True:
 		data = connection.recv(256)
 		print >>sys.stderr, 'server received "%s"' % data
 		if data:
 			print >>sys.stderr, 'sending answer back to the client'
-	
+
 			connection.sendall('process created')
 		else:
 			print >>sys.stderr, 'no data from', client_address
 			connection.close()
 			sys.exit()
-			
+
+
+		if (CPU.finished and not LRU_instance.isEmpty()):
+			P = LRU_instance.getItem()
+			LRU_instance.removeItem(P)
+			CPU.add(P)
+		else:
+			CPU.run()
+
+		command = data
+		comment = None
+		parameters = []
+
+		if "//" in command:
+			commentSplit = data.split("//")
+			command = commentSplit[0]
+			comment = commentSplit[1]
+		if " " in  command:
+			parameters = commentSplit[0].split(" ")
+			command = parameters[0]
+		if command == "Create":
+			create(parameters[1])
+
+
 finally:
      # Clean up the connection
 	print >>sys.stderr, 'se fue al finally'
